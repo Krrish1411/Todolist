@@ -10,8 +10,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container"> <!-- Wrap content in container -->
-    <div class="header-container">
+    <div class="dashboard-container"> <!-- Main flex container -->
+        <div class="left-column"> <!-- Left side: Header, Controls, Tasks -->
+            <div class="header-container">
         <h1 class="app-title">
              <svg class="app-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" width="1em" height="1em"><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg>
              Todo List <span class="author-name">By Krish Patel</span>
@@ -27,30 +28,58 @@
         </div>
     </div>
 
-    <div class="input-container">
-        <input type="text" id="task-input" placeholder="Add a new item...">
-        <select id="item-type-select">
-            <option value="task" selected>Task</option>
-            <option value="reminder">Reminder</option>
-        </select>
-        <div class="time-inputs"> <!-- Group time inputs -->
-             <input type="datetime-local" id="start-time" title="Start time (optional)">
-             <input type="datetime-local" id="end-time" title="End time (optional)">
+    <div class="top-controls"> <!-- New container for button and progress -->
+        <button id="add-task-btn" class="add-task-button">+ New</button>
+        <div id="progress-display" class="progress-display">
+            <!-- Progress info will be added here by JS -->
+            <span class="progress-label">Today's Progress:</span>
+            <span id="progress-text">0/0</span>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
         </div>
-        <button id="add-task-btn">Add Item</button>
+    </div>
+    
+    <!-- Task Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="modal-title">Add New Task</h3>
+            <div class="form-group">
+                <label for="task-text">Task Description</label>
+                <input type="text" id="task-text" placeholder="Enter task description">
+            </div>
+            <div class="form-group">
+                <label for="task-type">Type</label>
+                <select id="task-type">
+                    <option value="task">Task</option>
+                    <option value="reminder">Reminder</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Schedule</label>
+                <div class="time-input-group">
+                    <input type="datetime-local" id="start-time" title="Start time">
+                    <input type="datetime-local" id="end-time" title="End time">
+                </div>
+            </div>
+            <button id="save-task-btn" class="save-button">Save Task</button>
+        </div>
     </div>
 <div class="filter-container">
     <button class="filter-btn active" data-filter="all">Inbox</button>
-    <button class="filter-btn" data-filter="tasks">Tasks</button> <!-- Changed data-filter from active -->
-    <button class="filter-btn" data-filter="reminders">Reminders</button>
+    <button class="filter-btn" data-filter="today">Today</button>
+    <button class="filter-btn" data-filter="upcoming">Upcoming</button>
 </div>
 
 <ul id="task-list">
     <!-- Tasks will be added here -->
 </ul>
-    <!-- Removed duplicate closing ul tag -->
+            <!-- Removed duplicate closing ul tag -->
+        </div> <!-- End left-column -->
 
-    <h2>Calendar View</h2>
+        <div class="right-column"> <!-- Right side: Calendar -->
+            <h2>Calendar View</h2>
     <div class="calendar-controls">
         <button id="prev-year-btn">&lt;&lt; Year</button>
         <button id="prev-month-btn">&lt; Month</button>
@@ -60,9 +89,40 @@
     </div>
     <div id="calendar-view">
         <!-- Calendar will be generated here -->
+            </div>
+        </div> <!-- End right-column -->
+
+    </div> <!-- End dashboard-container -->
+
+    <!-- Modals remain outside the main columns for overlay effect -->
+    <!-- Task Modal -->
+    <div id="task-modal" class="modal"> <!-- Keep original modal structure -->
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="modal-title">Add New Task</h3>
+            <div class="form-group">
+                <label for="task-text">Task Description</label>
+                <input type="text" id="task-text" placeholder="Enter task description">
+            </div>
+            <div class="form-group">
+                <label for="task-type">Type</label>
+                <select id="task-type">
+                    <option value="task">Task</option>
+                    <option value="reminder">Reminder</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Schedule</label>
+                <div class="time-input-group">
+                    <input type="datetime-local" id="start-time" title="Start time">
+                    <input type="datetime-local" id="end-time" title="End time">
+                </div>
+            </div>
+            <button id="save-task-btn" class="save-button">Save Task</button>
+        </div>
     </div>
 
-    <!-- Daily View Container (Initially Hidden) -->
+    <!-- Daily View Modal -->
     <div id="daily-view-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <button id="close-daily-view" class="close-btn">&times;</button>
@@ -72,8 +132,6 @@
             </div>
         </div>
     </div>
-
-    </div> <!-- Close container div -->
 
     <footer>
         <p>Created by Krish Patel</p>
