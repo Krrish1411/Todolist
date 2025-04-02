@@ -1,13 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const taskInput = document.getElementById('task-input');
-    const itemTypeSelect = document.getElementById('item-type-select'); // New select element
-    // const reminderTimeContainer = document.getElementById('reminder-time-container'); // No longer needed
-    // const themeToggle = document.getElementById('theme-checkbox'); // Replaced with select
-    const themeSelect = document.getElementById('theme-select'); // Theme select dropdown
-    const startTimeInput = document.getElementById('start-time'); // Renamed from reminderTimeInput
-    const endTimeInput = document.getElementById('end-time'); // New end time input
-    const addTaskBtn = document.getElementById('add-task-btn');
-    const taskList = document.getElementById('task-list');
+    // Modal elements
+    const modal = document.getElementById('task-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const taskTextInput = document.getElementById('task-text');
+    const taskTypeSelect = document.getElementById('task-type');
+    const startTimeInput = document.getElementById('start-time');
+    const endTimeInput = document.getElementById('end-time');
+    const saveTaskBtn = document.getElementById('save-task-btn');
+    const closeModal = document.querySelector('.close-modal');
+    const addTaskBtn = document.querySelector('.add-task-button');
+    const themeSelect = document.getElementById('theme-select');
     const calendarView = document.getElementById('calendar-view');
     const filterButtons = document.querySelectorAll('.filter-btn');
     const prevYearBtn = document.getElementById('prev-year-btn');
@@ -19,10 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const dailyViewDate = document.getElementById('daily-view-date');
     const dailyTimeline = document.getElementById('daily-timeline');
     const closeDailyViewBtn = document.getElementById('close-daily-view');
+    const taskList = document.getElementById('task-list');
+    const progressText = document.getElementById('progress-text');
+    const progressBar = document.getElementById('progress-bar');
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    let reminderTimeouts = {}; // Store timeout IDs for reminders
+    let notificationTimeouts = {}; // Renamed from reminderTimeouts
     let currentFilter = 'all'; // Initial filter state
     let displayDate = new Date(); // Date object to track displayed month/year
+    let editingTaskId = null; // Track the ID of the task being edited
 
     // --- Notification Permission ---
     function requestNotificationPermission() {
@@ -45,71 +51,196 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requestNotificationPermission(); // Request permission on load
 
+    // Modal Functions
+    function openTaskModal(task = null) {
+        if (task) {
+            modalTitle.textContent = 'Edit Task';
+            taskTextInput.value = task.text;
+            taskTypeSelect.value = task.type;
+            startTimeInput.value = task.startTime || '';
+            endTimeInput.value = task.endTime || '';
+            editingTaskId = task.id; // Store the ID of the task being edited
+        } else {
+            modalTitle.textContent = 'Add New Task';
+            taskTextInput.value = '';
+            taskTypeSelect.value = 'task';
+            startTimeInput.value = '';
+            endTimeInput.value = '';
+            editingTaskId = null; // Ensure we are not in edit mode
+        }
+        modal.style.display = 'block';
+    }
+
+    function closeTaskModal() {
+        modal.style.display = 'none';
+        editingTaskId = null; // Reset edit mode on close
+    }
+
+    // Event Listeners for Modal
+    addTaskBtn.addEventListener('click', () => openTaskModal());
+    closeModal.addEventListener('click', closeTaskModal);
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeTaskModal();
+    });
+
     // --- Task Functions ---
-    function addTask() {
-        const taskText = taskInput.value.trim();
-        const itemType = itemTypeSelect.value; // Get selected type ('task' or 'reminder')
-        let startTime = null; // Renamed from reminderTime
-        let endTime = null;
+    function saveTask() {
+        const taskText = taskTextInput.value.trim();
+        const itemType = taskTypeSelect.value;
+        const startTime = startTimeInput.value || null;
+        const endTime = endTimeInput.value || null;
 
         if (taskText === '') {
-            alert('Please enter item text.');
+            alert('Please enter task text.');
             return;
         }
 
-        // Always get reminder time, but it's optional unless type is 'reminder'
-        startTime = startTimeInput.value || null;
-        endTime = endTimeInput.value || null;
-
-        // Validation: End time cannot be before start time if both are set
         if (startTime && endTime && new Date(endTime) < new Date(startTime)) {
             alert('End time cannot be before start time.');
             return;
         }
 
-        // Validation: Reminders still require a start time
-        if (itemType === 'reminder' && !startTime) {
-             alert('Please select a start date and time when adding a reminder.');
-             return;
+        // Note: Removed the check that required startTime for reminders,
+        // allowing reminders without a specific time (they just won't notify).
+        // if (itemType === 'reminder' && !startTime) {
+        //     alert('Please select a start time for reminders.');
+        //     return;
+        // }
+
+        let taskData;
+
+        if (editingTaskId !== null) {
+            // --- Editing existing task ---
+            taskData = tasks.find(task => task.id === editingTaskId);
+            if (taskData) {
+                // Clear previous notification before updating details
+                clearNotification(taskData.id); // Use renamed function
+
+                // Update task properties
+                taskData.text = taskText;
+                taskData.type = itemType;
+                taskData.startTime = startTime;
+                taskData.endTime = endTime;
+                // Keep original completed status and addedDate
+            }
+            editingTaskId = null; // Reset edit mode
+        } else {
+            // --- Adding new task ---
+            taskData = {
+                id: Date.now(),
+                text: taskText,
+                type: itemType,
+                startTime: startTime,
+                endTime: endTime,
+                completed: false,
+                addedDate: new Date().toISOString().split('T')[0]
+            };
+            tasks.push(taskData);
         }
-
-        // We will check permission more reliably within scheduleReminder
-
-        const newTask = {
-            id: Date.now(), // Simple unique ID
-            text: taskText,
-            type: itemType, // Store the type
-            startTime: startTime, // Renamed from reminder
-            endTime: endTime, // Add end time
-            completed: false,
-            addedDate: new Date().toISOString().split('T')[0] // Store YYYY-MM-DD
-        };
-
-        tasks.push(newTask);
         saveTasks();
-        renderTasks(currentFilter); // Render tasks based on current filter
-        renderCalendar(displayDate.getFullYear(), displayDate.getMonth()); // Update calendar for current view
+        renderTasks(currentFilter);
+        renderCalendar(displayDate.getFullYear(), displayDate.getMonth());
+        updateProgressDisplay(); // Update progress on save
 
-        // Schedule reminder only if it's a reminder, has time, and permission is granted
-        // Schedule reminder only if it's a reminder, has START time, and permission is granted
-        if (newTask.type === 'reminder' && newTask.startTime && 'Notification' in window && Notification.permission === 'granted') {
-             scheduleReminder(newTask); // Pass the whole task object
+        // Schedule notification if applicable (works for both task and reminder with startTime)
+        if (taskData && taskData.startTime &&
+            'Notification' in window && Notification.permission === 'granted') {
+            scheduleNotification(taskData); // Use renamed function
         }
 
+        closeTaskModal();
+    }
 
-        taskInput.value = '';
-        startTimeInput.value = ''; // Clear start time
-        endTimeInput.value = ''; // Clear end time
-        itemTypeSelect.value = 'task'; // Reset dropdown to 'Task'
-        // Line removed as reminderTimeContainer is no longer used
+    saveTaskBtn.addEventListener('click', saveTask);
+
+    // Update renderTasks to use edit functionality
+    function renderTasks(filter = 'all') {
+        taskList.innerHTML = '';
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const filteredTasks = tasks.filter(task => {
+            if (filter === 'today') {
+                // Task startTime exists and the date part matches today's date
+                return task.startTime && task.startTime.startsWith(todayStr);
+            }
+            if (filter === 'upcoming') {
+                // Task startTime exists and is after today (compare date part only)
+                return task.startTime && task.startTime.split('T')[0] > todayStr;
+            }
+            // 'all' or any other filter shows everything (default)
+            return true;
+        });
+
+        if (filteredTasks.length === 0) {
+            taskList.innerHTML = '<li class="no-tasks-message">No tasks found for this filter.</li>';
+            return;
+        }
+
+        filteredTasks.forEach(task => {
+            const li = document.createElement('li');
+            li.dataset.id = task.id;
+            li.classList.add('task-item');
+            if (task.completed) li.classList.add('completed');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.completed;
+            checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+
+            const taskSpan = document.createElement('span');
+            taskSpan.textContent = task.text;
+            taskSpan.classList.add('task-text');
+
+            const typeSpan = document.createElement('span');
+            typeSpan.classList.add('item-type-info');
+            let typeText = `Type: ${task.type.charAt(0).toUpperCase() + task.type.slice(1)}`;
+            if (task.startTime) {
+                const startDate = new Date(task.startTime);
+                typeText += ` (Starts: ${startDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+                if (task.endTime) {
+                    const endDate = new Date(task.endTime);
+                    if (startDate.toDateString() !== endDate.toDateString()) {
+                        typeText += ` on ${startDate.toLocaleDateString()}`;
+                        typeText += ` - Ends: ${endDate.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}`;
+                    } else {
+                        typeText += ` - ${endDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+                    }
+                }
+                typeText += ')';
+            }
+
+            typeSpan.textContent = typeText;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.classList.add('edit-btn');
+            editBtn.addEventListener('click', () => openTaskModal(task));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteTask(task.id);
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(taskSpan);
+            li.appendChild(typeSpan);
+            li.appendChild(editBtn);
+            li.appendChild(deleteBtn);
+            taskList.appendChild(li);
+        });
     }
 
     function deleteTask(id) {
         tasks = tasks.filter(task => task.id !== id);
-        clearReminder(id); // Clear any scheduled reminder for this task
+        clearNotification(id); // Use renamed function
         saveTasks();
         renderTasks(currentFilter);
         renderCalendar(displayDate.getFullYear(), displayDate.getMonth());
+        updateProgressDisplay(); // Update progress on delete
     }
 
     function toggleTaskCompletion(id) {
@@ -118,21 +249,19 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         saveTasks();
         renderTasks(currentFilter);
-        // No need to update calendar for completion status change, but might affect 'active' filter
+        updateProgressDisplay(); // Update progress on completion toggle
+        // No need to update calendar for completion status change
     }
 
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    // --- Reminder Functions ---
-    function scheduleReminder(task) {
-        // Check prerequisites right before scheduling - ensure it's a reminder type
-        console.log(`Attempting to schedule reminder for "${task.text}" (ID: ${task.id}, Type: ${task.type})`);
-        if (task.type !== 'reminder') {
-             console.log(`-> Skipping schedule: Item type is "${task.type}", not "reminder".`);
-             return;
-        }
+    // --- Notification Functions ---
+    function scheduleNotification(task) { // Renamed function
+        // Schedule for both tasks and reminders if they have a start time
+        console.log(`Attempting to schedule notification for "${task.text}" (ID: ${task.id}, Type: ${task.type})`);
+
         // Use startTime for scheduling
         if (!task.startTime) {
              console.log(`-> Skipping schedule: No start time set.`);
@@ -166,114 +295,34 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- End Debugging ---
         if (delay > 0) {
             // Clear existing timeout for this task ID if rescheduling
-            clearReminder(task.id);
+            clearNotification(task.id); // Use renamed function
 
+            const notificationTitle = task.type === 'reminder' ? 'Todo Reminder!' : 'Task Due!';
             const timeoutId = setTimeout(() => {
-                new Notification('Todo Reminder!', {
+                new Notification(notificationTitle, {
                     body: task.text,
                     icon: 'icon.png' // Optional: Add an icon file named icon.png
                 });
-                delete reminderTimeouts[task.id]; // Remove from tracking after firing
+                delete notificationTimeouts[task.id]; // Use renamed object
                 // Optionally mark task as notified or remove reminder time
             }, delay);
-            reminderTimeouts[task.id] = timeoutId; // Store the timeout ID
-            console.log(`-> Reminder successfully scheduled for task "${task.text}" (ID: ${task.id}) at ${reminderDateTime} with timeout ID ${timeoutId}`);
+            notificationTimeouts[task.id] = timeoutId; // Use renamed object
+            console.log(`-> Notification successfully scheduled for task "${task.text}" (ID: ${task.id}) at ${reminderDateTime} with timeout ID ${timeoutId}`);
         } else {
              // Time is in the past or now (delay <= 0)
-             console.log(`-> Reminder time for task "${task.text}" (ID: ${task.id}) is in the past or now (Delay: ${delay}ms). Not scheduling timeout.`);
-             // Note: We are not triggering immediate past-due notifications here anymore
-             // to simplify debugging the core scheduling issue.
+             console.log(`-> Notification time for task "${task.text}" (ID: ${task.id}) is in the past or now (Delay: ${delay}ms). Not scheduling timeout.`);
+        }
+    } // Correct closing brace for scheduleNotification
+
+    function clearNotification(taskId) { // Renamed function
+        if (notificationTimeouts[taskId]) { // Use renamed object
+            clearTimeout(notificationTimeouts[taskId]); // Use renamed object
+            delete notificationTimeouts[taskId]; // Use renamed object
+            console.log(`Cleared notification for task ID ${taskId}`);
         }
     }
 
-    function clearReminder(taskId) {
-        if (reminderTimeouts[taskId]) {
-            clearTimeout(reminderTimeouts[taskId]);
-            delete reminderTimeouts[taskId];
-            console.log(`Cleared reminder for task ID ${taskId}`);
-        }
-    }
-
-    // --- Rendering Functions ---
-    function renderTasks(filter = 'all') {
-        taskList.innerHTML = ''; // Clear existing list
-
-        const filteredTasks = tasks.filter(task => {
-            if (filter === 'tasks') { // Changed from 'active'
-                return task.type === 'task';
-            } else if (filter === 'reminders') {
-                return task.type === 'reminder'; // Check the explicit type
-            }
-            return true; // 'all' filter shows everything
-        });
-
-
-        if (filteredTasks.length === 0) {
-             taskList.innerHTML = '<li class="no-tasks-message">No tasks found for this filter.</li>';
-             return;
-        }
-
-
-        filteredTasks.forEach(task => {
-            const li = document.createElement('li');
-            li.dataset.id = task.id;
-            li.classList.add('task-item'); // Add class for styling
-            if (task.completed) {
-                li.classList.add('completed');
-            }
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = task.completed;
-            checkbox.classList.add('task-checkbox');
-            checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
-
-            const taskDetailsDiv = document.createElement('div');
-            taskDetailsDiv.classList.add('task-details');
-
-            const taskSpan = document.createElement('span');
-            taskSpan.textContent = task.text;
-            taskSpan.classList.add('task-text');
-
-            taskDetailsDiv.appendChild(taskSpan); // Add text first
-
-            // Display type and reminder time if applicable
-            const typeSpan = document.createElement('span');
-            typeSpan.classList.add('item-type-info');
-            let typeText = `Type: ${task.type.charAt(0).toUpperCase() + task.type.slice(1)}`;
-            if (task.startTime) {
-                 const startDate = new Date(task.startTime);
-                 typeText += ` (Starts: ${startDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`; // Show time only initially
-                 if (task.endTime) {
-                      const endDate = new Date(task.endTime);
-                      // Check if end date is different from start date
-                      if (startDate.toDateString() !== endDate.toDateString()) {
-                           typeText += ` on ${startDate.toLocaleDateString()}`; // Add start date if end date is different
-                           typeText += ` - Ends: ${endDate.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}`;
-                      } else {
-                           typeText += ` - ${endDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`; // Only show end time if same day
-                      }
-                 }
-                 typeText += ')';
-            }
-            typeSpan.textContent = typeText;
-            taskDetailsDiv.appendChild(typeSpan);
-
-
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'Delete';
-            deleteBtn.classList.add('delete-btn'); // Add class for styling
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent li click event
-                deleteTask(task.id);
-            });
-
-            li.appendChild(checkbox);
-            li.appendChild(taskDetailsDiv); // Add the div containing text and reminder
-            li.appendChild(deleteBtn);
-            taskList.appendChild(li);
-        });
-    }
+    // --- Calendar Rendering ---
 
     function renderCalendar(year, month) {
         calendarView.innerHTML = ''; // Clear previous calendar
@@ -308,14 +357,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Get tasks grouped by date for efficient lookup
-        // Get tasks grouped by date (using reminder date if available, otherwise addedDate)
         // Group tasks by START date for calendar view
         const tasksByDate = tasks.reduce((acc, task) => {
+            // Use startTime if available, otherwise use addedDate for grouping
             const dateToSortBy = task.startTime ? new Date(task.startTime).toISOString().split('T')[0] : task.addedDate;
-            if (!acc[dateToSortBy]) {
-                acc[dateToSortBy] = [];
+            if (dateToSortBy) { // Ensure there is a date to group by
+                 if (!acc[dateToSortBy]) {
+                     acc[dateToSortBy] = [];
+                 }
+                 acc[dateToSortBy].push(task);
             }
-            acc[dateToSortBy].push(task);
             return acc;
         }, {});
 
@@ -346,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      const moreP = document.createElement('p');
                      moreP.textContent = `+${tasksForDay.length - 2} more`;
                      moreP.style.fontSize = '0.8em';
-                     moreP.style.color = '#555';
+                     moreP.style.color = '#555'; // Consider theming this color
                      taskInfoDiv.appendChild(moreP);
                 }
                 dayCell.appendChild(taskInfoDiv);
@@ -354,7 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
                  dayCell.title = tasksForDay.map(t => t.text).join('\n');
             }
 
-            // Highlight today's date
             // Highlight today's actual date
             if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
                  dayCell.classList.add('today'); // Add class for styling today
@@ -371,14 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event Listeners ---
-    addTaskBtn.addEventListener('click', addTask);
-    taskInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addTask();
-        }
-    });
-    // Listener for item type dropdown change (No longer needed to hide/show time)
-    // itemTypeSelect.addEventListener('change', (e) => { ... });
+    // Removed redundant listeners for addTaskBtn and taskInput keypress, modal handles saving.
 
     // Filter button listeners
     filterButtons.forEach(button => {
@@ -413,27 +456,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Theme Switcher ---
     function applyTheme(theme) {
-        // Remove existing theme classes first
-        document.body.classList.remove('dark-mode', 'ocean-theme', 'forest-theme'); // Add future theme classes here
+        // Define the theme class names used in the CSS
+        const themeClasses = ['dark-mode', 'ocean-theme', 'forest-theme'];
+        // Remove any existing theme classes
+        document.body.classList.remove(...themeClasses);
 
-        // Add the selected theme class
+        // Add the appropriate class based on the selected theme value
         if (theme === 'dark') {
-            document.body.classList.add('dark-mode');
-        } else if (theme === 'ocean') {
-            document.body.classList.add('ocean-theme');
-        } else if (theme === 'forest') {
-             document.body.classList.add('forest-theme');
+            document.body.classList.add('dark-mode'); // Use 'dark-mode' as defined in CSS
+        } else if (theme !== 'light') {
+            // For other themes (ocean, forest), append '-theme' as before
+            document.body.classList.add(theme + '-theme');
         }
-        // 'light' theme doesn't need a specific class, it's the default
 
-        // Update the dropdown to reflect the current theme
+        // Store preference and force UI refresh
+        localStorage.setItem('theme', theme);
+        // renderCalendar(displayDate.getFullYear(), displayDate.getMonth()); // Removed: Theme change should ideally only require CSS update
+        // Update dropdown to match current theme
         themeSelect.value = theme;
     }
 
+    // Initialize theme from storage or default
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    // Theme change handler
     themeSelect.addEventListener('change', () => {
-        const newTheme = themeSelect.value;
-        localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
+        applyTheme(themeSelect.value);
     });
 
     // --- Daily View Functions ---
@@ -545,123 +594,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-    // --- Initial Load --- (This block was duplicated and is now removed)
-    // --- Daily View Functions ---
-    function openDailyView(year, month, day) {
-        const selectedDate = new Date(year, month, day);
-        dailyViewDate.textContent = selectedDate.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        renderDailyTimeline(selectedDate);
-        dailyViewModal.classList.add('visible');
-        dailyViewModal.style.display = 'flex'; // Use flex to enable centering
-    }
-
-    function closeDailyView() {
-        dailyViewModal.classList.remove('visible');
-        // Use setTimeout to allow fade-out transition before setting display: none
-        setTimeout(() => {
-             if (!dailyViewModal.classList.contains('visible')) { // Check if still hidden
-                  dailyViewModal.style.display = 'none';
-             }
-        }, 300); // Match CSS transition duration
-    }
-
-
-    function renderDailyTimeline(date) {
-        dailyTimeline.innerHTML = ''; // Clear previous timeline
-        const dayStart = new Date(date);
-        dayStart.setHours(0, 0, 0, 0);
-        const dayEnd = new Date(date);
-        dayEnd.setHours(23, 59, 59, 999);
-
-        // Filter tasks for the selected day that have a start time
-        const tasksForDay = tasks.filter(task => {
-            if (!task.startTime) return false;
-            const taskStart = new Date(task.startTime);
-            // Basic check: task starts before the end of the day AND (ends after start of day OR has no end time)
-            const taskEnd = task.endTime ? new Date(task.endTime) : taskStart; // Use start time if no end time
-            return taskStart <= dayEnd && taskEnd >= dayStart;
-        });
-
-        // Sort tasks by start time
-        tasksForDay.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-        // Generate 24 hour slots
-        for (let hour = 0; hour < 24; hour++) {
-            const slot = document.createElement('div');
-            slot.classList.add('timeline-slot');
-
-            const timeLabel = document.createElement('span');
-            timeLabel.classList.add('timeline-time');
-            timeLabel.textContent = `${hour}:00`;
-            slot.appendChild(timeLabel);
-
-            dailyTimeline.appendChild(slot);
-        }
-
-         // Position tasks on the timeline
-         tasksForDay.forEach(task => {
-             const taskStart = new Date(task.startTime);
-             const taskEnd = task.endTime ? new Date(task.endTime) : new Date(taskStart.getTime() + 60 * 60 * 1000); // Default to 1 hour if no end time
-
-             // Ensure we only consider the portion within the current day
-             const effectiveStart = Math.max(taskStart.getTime(), dayStart.getTime());
-             const effectiveEnd = Math.min(taskEnd.getTime(), dayEnd.getTime());
-
-             const startHour = new Date(effectiveStart).getHours();
-             const startMinute = new Date(effectiveStart).getMinutes();
-             const endHour = new Date(effectiveEnd).getHours();
-             const endMinute = new Date(effectiveEnd).getMinutes();
-
-             // Calculate top position (percentage of the day)
-             const startMinutesTotal = startHour * 60 + startMinute;
-             const topPercent = (startMinutesTotal / (24 * 60)) * 100;
-
-             // Calculate height (percentage of the day)
-             const endMinutesTotal = endHour * 60 + endMinute;
-             const durationMinutes = Math.max(15, endMinutesTotal - startMinutesTotal); // Min duration of 15 mins visually
-             const heightPercent = (durationMinutes / (24 * 60)) * 100;
-
-             const taskElement = document.createElement('div');
-             taskElement.classList.add('timeline-task');
-             if (task.type === 'reminder') {
-                 taskElement.classList.add('reminder');
-             }
-             taskElement.textContent = task.text;
-             taskElement.title = `${task.text}\n${new Date(task.startTime).toLocaleTimeString()} - ${task.endTime ? new Date(task.endTime).toLocaleTimeString() : '?'}`; // Tooltip with times
-             taskElement.style.top = `${topPercent}%`;
-             taskElement.style.height = `${heightPercent}%`;
-
-             // Find the correct slot to append to (optional, could just append to timeline)
-             // This helps with potential overlap styling later if needed
-             const targetSlot = dailyTimeline.children[startHour];
-             if (targetSlot) {
-                 targetSlot.appendChild(taskElement);
-             } else {
-                 dailyTimeline.appendChild(taskElement); // Fallback
-             }
-         });
-    }
-
-    // --- Daily View Event Listeners ---
-    closeDailyViewBtn.addEventListener('click', closeDailyView);
-    dailyViewModal.addEventListener('click', (e) => {
-        // Close if clicked on the overlay itself, not the content
-        if (e.target === dailyViewModal) {
-            closeDailyView();
+    // --- ESC Key Listener for Modals ---
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // Check if Task Modal is open
+            if (modal.style.display === 'block') {
+                closeTaskModal();
+            }
+            // Check if Daily View Modal is open
+            if (dailyViewModal.classList.contains('visible')) {
+                closeDailyView();
+            }
         }
     });
 
+    // --- Progress Display Function ---
+    function updateProgressDisplay() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        // Filter tasks that have a start time today
+        const todaysTasks = tasks.filter(task => task.startTime && task.startTime.startsWith(todayStr));
+        const totalTasksToday = todaysTasks.length;
+        const completedTasksToday = todaysTasks.filter(task => task.completed).length;
 
-    // --- Initial Load --- (ApplyTheme moved here)
-    const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
-    applyTheme(savedTheme);
+        if (totalTasksToday === 0) {
+            progressText.textContent = "No tasks for today";
+            progressBar.style.width = '0%';
+        } else {
+            const percentage = Math.round((completedTasksToday / totalTasksToday) * 100);
+            progressText.textContent = `${completedTasksToday}/${totalTasksToday} completed`;
+            progressBar.style.width = `${percentage}%`;
+        }
+    }
 
+    // --- Initial Load ---
+    applyTheme(localStorage.getItem('theme') || 'light');
     renderTasks(currentFilter); // Initial render with default filter
     renderCalendar(displayDate.getFullYear(), displayDate.getMonth()); // Initial render for current month/year
+    updateProgressDisplay(); // Initial progress display
 
-    // Schedule reminders for existing tasks on load
-    console.log("Scheduling reminders for existing tasks on load...");
-    tasks.forEach(scheduleReminder);
-    console.log("Finished scheduling initial reminders.");
+    // Schedule notifications for existing tasks on load
+    console.log("Scheduling notifications for existing tasks on load...");
+    tasks.forEach(scheduleNotification); // Use renamed function
+    console.log("Finished scheduling initial notifications.");
 });
