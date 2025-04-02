@@ -1,0 +1,976 @@
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* Modern system font stack */
+    margin: 0;
+    background-color: #f8f9fa; /* Default light background */
+    color: #212529; /* Default text color */
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transitions */
+}
+
+.container { /* Add a container for better centering and max-width */
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    border-radius: 12px; /* More rounded corners */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 0 10px; /* Add some padding */
+}
+
+h1 {
+    margin: 0; /* Remove default margin */
+    color: #343a40; /* Slightly darker heading */
+    text-align: left; /* Align left within header container */
+}
+
+.app-title {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between logo and text */
+}
+
+.app-logo {
+    height: 1.2em; /* Adjust size relative to h1 font size */
+    width: auto;
+    vertical-align: middle; /* Align logo nicely with text */
+    color: #007bff; /* Match primary button color */
+    flex-shrink: 0;
+}
+
+.author-name {
+    font-weight: 700; /* Make it bold */
+    font-size: 0.8em; /* Slightly larger */
+    color: #6c757d;
+    margin-left: 5px;
+    font-family: 'Dancing Script', cursive; /* Example cursive font */
+}
+
+h2 {
+    color: #495057; /* Slightly lighter sub-heading */
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+h2 {
+    margin-top: 40px;
+    border-top: 1px solid #dee2e6; /* Slightly darker border */
+    padding-top: 25px;
+}
+
+.input-container {
+    display: flex;
+    gap: 10px; /* Use gap for spacing */
+    margin-bottom: 25px;
+    align-items: center; /* Align items vertically */
+}
+
+.time-inputs {
+    display: flex;
+    gap: 5px; /* Small gap between time inputs */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Adjust individual time input width if needed */
+.time-inputs input[type="datetime-local"] {
+    min-width: 180px; /* Example width, adjust as needed */
+}
+
+#task-input, #reminder-time, #item-type-select { /* Add select to shared styles */
+    padding: 12px 15px;
+    border: 1px solid #ced4da; /* Slightly darker input border */
+    border-radius: 8px; /* More rounded inputs */
+    font-size: 1rem;
+    transition: border-color 0.2s ease-in-out, background-color 0.3s ease, color 0.3s ease; /* Add transitions */
+    height: 48px;
+    box-sizing: border-box;
+}
+
+#item-type-select {
+    background-color: #ffffff;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding-right: 30px; /* Make space for dropdown arrow */
+    appearance: none; /* Remove default system appearance */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Basic arrow */
+    background-repeat: no-repeat;
+    background-position: right .75rem center;
+    background-size: 8px 10px;
+}
+
+/* #reminder-time-container no longer exists */
+
+#task-input:focus, #reminder-time:focus, #item-type-select:focus { /* Add select focus */
+    outline: none;
+    border-color: #80bdff; /* Standard Bootstrap focus blue */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Standard Bootstrap focus shadow */
+}
+
+#task-input {
+     flex-grow: 1; /* Allow task input to take more space */
+}
+
+/* Styles for #reminder-time are now combined above */
+
+#add-task-btn {
+    padding: 12px 20px;
+    background-color: #007bff; /* Bootstrap primary blue */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease; /* Add transform/shadow transition */
+}
+
+#add-task-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: translateY(-1px); /* Slight lift on hover */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    padding: 8px 15px;
+    border: 1px solid #ced4da;
+    background-color: #e9ecef; /* Slightly darker base */
+    color: #495057;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.filter-btn:hover {
+    background-color: #dee2e6;
+    border-color: #adb5bd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+
+#task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Remove auto margin, handled by container */
+    min-height: 50px; /* Ensure list has height even when empty */
+    position: relative; /* For positioning the no-tasks message */
+}
+
+.no-tasks-message {
+    text-align: center;
+    color: #6c757d; /* Keep grey for light mode */
+    padding: 20px;
+    font-style: italic;
+}
+
+.task-item { /* Use the class selector */
+    background-color: #ffffff; /* White task items */
+    padding: 15px 20px; /* More padding */
+    margin-bottom: 12px; /* Slightly more space */
+    border: 1px solid #dee2e6; /* Match container border */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.task-item:hover {
+    background-color: #f8f9fa; /* Slight grey on hover */
+    border-color: #ced4da;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+}
+
+.task-checkbox {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #007bff; /* Match button color */
+}
+
+.task-details {
+    flex-grow: 1; /* Take remaining space */
+    display: flex;
+    flex-direction: column; /* Stack text and reminder */
+}
+
+.task-text {
+    font-size: 1rem;
+    color: #343a40; /* Darker task text */
+}
+
+.item-type-info { /* Style for the new type/reminder span */
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 3px;
+}
+
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: #6c757d; /* Standard grey when completed */
+}
+
+.task-item.completed .item-type-info {
+     color: #adb5bd; /* Lighter grey */
+}
+
+.delete-btn { /* Use the class selector */
+    background-color: #dc3545; /* Bootstrap danger red */
+    color: white;
+    border: none;
+    padding: 8px 14px; /* Slightly larger */
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.delete-btn:hover {
+    background-color: #c82333; /* Darker red */
+    transform: translateY(-1px);
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 10px; /* Add some padding */
+}
+
+.calendar-controls button {
+    padding: 6px 12px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #495057;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.calendar-controls button:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+}
+
+#current-month-year {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #343a40;
+}
+
+
+#calendar-view {
+    margin-top: 30px;
+    background-color: #ffffff;
+    padding: 25px; /* More padding */
+    border: 1px solid #dee2e6;
+    border-radius: 12px; /* Match container */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.calendar-day-header {
+    font-weight: 600;
+    color: #6c757d; /* Keep grey */
+    padding-bottom: 10px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.calendar-day {
+    padding: 8px;
+    border: 1px solid #e9ecef; /* Slightly more visible border */
+    min-height: 90px; /* Slightly taller days */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    font-size: 0.9em;
+    background-color: #ffffff;
+    border-radius: 6px; /* Slightly less rounded than container */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.calendar-day.empty {
+    background-color: #f8f9fa;
+    border-color: #f8f9fa; /* Match background */
+}
+
+.calendar-day span { /* Style the day number */
+    font-weight: 500;
+    margin-bottom: 5px;
+    align-self: flex-end; /* Move day number to top right */
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Highlight today */
+/* Highlight today using the class */
+.calendar-day.today {
+    border-color: #adb5bd; /* Slightly darker border for today */
+}
+.calendar-day.today span { /* Style the number span specifically */
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.has-task {
+    background-color: #e7f3ff; /* Lighter blue */
+}
+
+.calendar-task-list {
+    font-size: 0.8em;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.calendar-task-list p {
+    margin: 2px 0;
+    padding: 2px 4px;
+    background-color: rgba(0, 123, 255, 0.08); /* Lighter blue task background */
+    border-radius: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.calendar-task-list p[style*="line-through"] {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+}
+
+
+/* --- Theme Selector --- */
+.theme-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-selector-wrapper label {
+    font-size: 0.9em;
+    color: #495057;
+    margin-bottom: 0;
+    transition: color 0.3s ease; /* Add transition */
+}
+
+#theme-select {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    font-size: 0.9em;
+    cursor: pointer;
+    min-width: 100px;
+    transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease; /* Add background-image transition */
+    /* Add appearance none and background image for custom arrow */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right .75rem center;
+    background-size: 8px 10px;
+    padding-right: 2rem; /* Ensure space for arrow */
+}
+
+#theme-select:focus {
+     outline: none;
+     border-color: #80bdff;
+     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* --- Dark Mode --- */
+body.dark-mode {
+    background-color: #1a202c; /* Dark background */
+    color: #e2e8f0;
+}
+
+body.dark-mode .container {
+    background-color: #2d3748; /* Darker container background */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode h1, body.dark-mode h2 {
+    color: #cbd5e0; /* Even lighter heading */
+}
+
+body.dark-mode h2 {
+    border-top-color: #4a5568;
+}
+
+body.dark-mode #task-input,
+body.dark-mode #reminder-time,
+body.dark-mode #item-type-select {
+    background-color: #2d3748; /* Match container */
+    border-color: #4a5568; /* Slightly lighter border */
+    color: #e2e8f0;
+}
+
+body.dark-mode #task-input::placeholder {
+    color: #a0aec0;
+}
+
+
+body.dark-mode #task-input:focus,
+body.dark-mode #reminder-time:focus,
+body.dark-mode #item-type-select:focus {
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.25); /* Match light focus style */
+}
+
+body.dark-mode #add-task-btn {
+    background-color: #3182ce; /* Slightly darker blue */
+    color: #ffffff;
+}
+body.dark-mode #add-task-btn:hover {
+    background-color: #2c5282; /* Darker hover */
+}
+
+body.dark-mode .filter-btn {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #cbd5e0;
+}
+body.dark-mode .filter-btn:hover {
+    background-color: #718096;
+    border-color: #a0aec0;
+}
+body.dark-mode .filter-btn.active {
+    background-color: #3182ce;
+    color: #ffffff;
+    border-color: #3182ce;
+}
+
+body.dark-mode .no-tasks-message {
+    color: #a0aec0;
+}
+
+body.dark-mode .task-item {
+    background-color: #4a5568; /* Lighter item background */
+    border-color: #718096; /* Darker border */
+}
+body.dark-mode .task-item:hover {
+    background-color: #2d3748; /* Darker hover */
+}
+
+body.dark-mode .task-checkbox {
+     accent-color: #63b3ed;
+}
+
+body.dark-mode .task-text {
+    color: #e2e8f0; /* Keep light text */
+}
+body.dark-mode .item-type-info {
+    color: #a0aec0; /* Keep lighter grey */
+}
+
+body.dark-mode .task-item.completed .task-text {
+    color: #a0aec0; /* Lighter completed text */
+}
+body.dark-mode .task-item.completed .item-type-info {
+     color: #718096; /* Darker completed info */
+}
+
+body.dark-mode .delete-btn {
+    background-color: #e53e3e; /* Brighter red */
+}
+body.dark-mode .delete-btn:hover {
+    background-color: #c53030; /* Darker hover */
+}
+
+body.dark-mode .calendar-controls button {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #cbd5e0;
+}
+body.dark-mode .calendar-controls button:hover {
+    background-color: #718096;
+}
+body.dark-mode #current-month-year {
+    color: #cbd5e0;
+}
+
+body.dark-mode #calendar-view {
+    background-color: #2d3748;
+    border-color: #4a5568;
+}
+
+body.dark-mode .calendar-day-header {
+    color: #cbd5e0;
+}
+
+body.dark-mode .calendar-day {
+    background-color: #2d3748; /* Match container */
+    border-color: #4a5568; /* Match input border */
+}
+body.dark-mode .calendar-day.empty {
+    background-color: #1a202c; /* Match body */
+    border-color: #1a202c;
+}
+body.dark-mode .calendar-day span {
+    /* Day number color inherited from body */
+}
+body.dark-mode .calendar-day.today {
+    border-color: #718096;
+}
+body.dark-mode .calendar-day.today span {
+    background-color: #3182ce;
+    color: #ffffff;
+}
+
+body.dark-mode .calendar-day.has-task {
+    background-color: #4a5568; /* Lighter blue */
+}
+
+body.dark-mode .calendar-task-list p {
+    background-color: rgba(99, 179, 237, 0.2); /* Slightly more visible */
+    color: #e2e8f0;
+}
+body.dark-mode .calendar-task-list p[style*="line-through"] {
+    background-color: rgba(113, 128, 150, 0.25);
+    color: #a0aec0;
+}
+
+/* Style theme selector in dark mode */
+body.dark-mode .theme-selector-wrapper label {
+    color: #a0aec0;
+}
+body.dark-mode #theme-select {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0aec0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Grey arrow */
+}
+
+/* --- Ocean Theme --- */
+body.ocean-theme {
+    background-color: #e0f7fa; /* Light cyan background */
+    color: #004d40; /* Dark teal text */
+}
+body.ocean-theme .container {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 77, 64, 0.1);
+}
+body.ocean-theme h1, body.ocean-theme h2 { color: #00695c; }
+body.ocean-theme h2 { border-top-color: #b2dfdb; }
+body.ocean-theme #task-input,
+body.ocean-theme #reminder-time,
+body.ocean-theme #item-type-select {
+    border-color: #4db6ac;
+    background-color: #ffffff;
+    color: #004d40;
+}
+body.ocean-theme #task-input:focus,
+body.ocean-theme #reminder-time:focus,
+body.ocean-theme #item-type-select:focus {
+    border-color: #009688;
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.25);
+}
+body.ocean-theme #add-task-btn { background-color: #009688; color: white; }
+body.ocean-theme #add-task-btn:hover { background-color: #00796b; }
+body.ocean-theme .filter-btn { background-color: #b2dfdb; border-color: #80cbc4; color: #004d40; }
+body.ocean-theme .filter-btn:hover { background-color: #80cbc4; border-color: #4db6ac; }
+body.ocean-theme .filter-btn.active { background-color: #009688; border-color: #009688; color: white; }
+body.ocean-theme .task-item { background-color: #ffffff; border-color: #b2dfdb; }
+body.ocean-theme .task-item:hover { background-color: #e0f2f1; border-color: #80cbc4; }
+body.ocean-theme .task-checkbox { accent-color: #009688; }
+body.ocean-theme .task-text { color: #004d40; }
+body.ocean-theme .item-type-info { color: #00796b; }
+body.ocean-theme .task-item.completed .task-text { color: #4db6ac; }
+body.ocean-theme .task-item.completed .item-type-info { color: #80cbc4; }
+body.ocean-theme .delete-btn { background-color: #ff8a65; color: white; } /* Coral delete */
+body.ocean-theme .delete-btn:hover { background-color: #ff7043; }
+body.ocean-theme .calendar-controls button { background-color: #b2dfdb; border-color: #80cbc4; color: #004d40; }
+body.ocean-theme .calendar-controls button:hover { background-color: #80cbc4; }
+body.ocean-theme #current-month-year { color: #00695c; }
+body.ocean-theme #calendar-view { background-color: #ffffff; border-color: #b2dfdb; }
+body.ocean-theme .calendar-day-header { color: #00796b; }
+body.ocean-theme .calendar-day { background-color: #ffffff; border-color: #e0f2f1; }
+body.ocean-theme .calendar-day.empty { background-color: #e0f7fa; border-color: #e0f7fa; }
+body.ocean-theme .calendar-day.today { border-color: #4db6ac; }
+body.ocean-theme .calendar-day.today span { background-color: #009688; color: white; }
+body.ocean-theme .calendar-day.has-task { background-color: #b2ebf2; } /* Light cyan task day */
+body.ocean-theme .calendar-task-list p { background-color: rgba(0, 150, 136, 0.1); color: #004d40; }
+body.ocean-theme .calendar-task-list p[style*="line-through"] { background-color: rgba(77, 182, 172, 0.15); color: #4db6ac; }
+body.ocean-theme .theme-selector-wrapper label { color: #00695c; }
+body.ocean-theme #theme-select { background-color: #ffffff; border-color: #4db6ac; color: #004d40; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23009688%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+
+
+/* --- Forest Theme --- */
+body.forest-theme {
+    background-color: #f1f8e9; /* Very light green */
+    color: #33691e; /* Dark green text */
+}
+body.forest-theme .container {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(51, 105, 30, 0.1);
+}
+body.forest-theme h1, body.forest-theme h2 { color: #558b2f; }
+body.forest-theme h2 { border-top-color: #dcedc8; }
+body.forest-theme #task-input,
+body.forest-theme #reminder-time,
+body.forest-theme #item-type-select {
+    border-color: #aed581;
+    background-color: #ffffff;
+    color: #33691e;
+}
+body.forest-theme #task-input:focus,
+body.forest-theme #reminder-time:focus,
+body.forest-theme #item-type-select:focus {
+    border-color: #8bc34a; /* Lime green focus */
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.25);
+}
+body.forest-theme #add-task-btn { background-color: #8bc34a; color: #33691e; } /* Lime green button */
+body.forest-theme #add-task-btn:hover { background-color: #7cb342; }
+body.forest-theme .filter-btn { background-color: #dcedc8; border-color: #c5e1a5; color: #558b2f; }
+body.forest-theme .filter-btn:hover { background-color: #c5e1a5; border-color: #aed581; }
+body.forest-theme .filter-btn.active { background-color: #8bc34a; border-color: #8bc34a; color: #33691e; }
+body.forest-theme .task-item { background-color: #ffffff; border-color: #dcedc8; }
+body.forest-theme .task-item:hover { background-color: #f1f8e9; border-color: #c5e1a5; }
+body.forest-theme .task-checkbox { accent-color: #8bc34a; }
+body.forest-theme .task-text { color: #33691e; }
+body.forest-theme .item-type-info { color: #558b2f; }
+body.forest-theme .task-item.completed .task-text { color: #9ccc65; }
+body.forest-theme .task-item.completed .item-type-info { color: #aed581; }
+body.forest-theme .delete-btn { background-color: #ef5350; color: white; } /* Standard red delete */
+body.forest-theme .delete-btn:hover { background-color: #e53935; }
+body.forest-theme .calendar-controls button { background-color: #dcedc8; border-color: #c5e1a5; color: #558b2f; }
+body.forest-theme .calendar-controls button:hover { background-color: #c5e1a5; }
+body.forest-theme #current-month-year { color: #558b2f; }
+body.forest-theme #calendar-view { background-color: #ffffff; border-color: #dcedc8; }
+body.forest-theme .calendar-day-header { color: #558b2f; }
+body.forest-theme .calendar-day { background-color: #ffffff; border-color: #f1f8e9; }
+body.forest-theme .calendar-day.empty { background-color: #f1f8e9; border-color: #f1f8e9; }
+body.forest-theme .calendar-day.today { border-color: #aed581; }
+body.forest-theme .calendar-day.today span { background-color: #8bc34a; color: #33691e; }
+body.forest-theme .calendar-day.has-task { background-color: #dcedc8; } /* Light green task day */
+body.forest-theme .calendar-task-list p { background-color: rgba(139, 195, 74, 0.1); color: #33691e; }
+body.forest-theme .calendar-task-list p[style*="line-through"] { background-color: rgba(174, 213, 129, 0.15); color: #9ccc65; }
+body.forest-theme .theme-selector-wrapper label { color: #558b2f; }
+body.forest-theme #theme-select { background-color: #ffffff; border-color: #aed581; color: #33691e; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238BC34A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+body.ocean-theme {
+    background-color: #e0f7fa; /* Light cyan background */
+    color: #004d40; /* Dark teal text */
+}
+body.ocean-theme .container {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 77, 64, 0.1);
+}
+body.ocean-theme h1, body.ocean-theme h2 { color: #00695c; }
+body.ocean-theme h2 { border-top-color: #b2dfdb; }
+body.ocean-theme #task-input,
+body.ocean-theme #reminder-time,
+body.ocean-theme #item-type-select {
+    border-color: #4db6ac;
+    background-color: #ffffff;
+    color: #004d40;
+}
+body.ocean-theme #task-input:focus,
+body.ocean-theme #reminder-time:focus,
+body.ocean-theme #item-type-select:focus {
+    border-color: #009688;
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.25);
+}
+body.ocean-theme #add-task-btn { background-color: #009688; color: white; }
+body.ocean-theme #add-task-btn:hover { background-color: #00796b; }
+body.ocean-theme .filter-btn { background-color: #b2dfdb; border-color: #80cbc4; color: #004d40; }
+body.ocean-theme .filter-btn:hover { background-color: #80cbc4; border-color: #4db6ac; }
+body.ocean-theme .filter-btn.active { background-color: #009688; border-color: #009688; color: white; }
+body.ocean-theme .task-item { background-color: #ffffff; border-color: #b2dfdb; }
+body.ocean-theme .task-item:hover { background-color: #e0f2f1; border-color: #80cbc4; }
+body.ocean-theme .task-checkbox { accent-color: #009688; }
+body.ocean-theme .task-text { color: #004d40; }
+body.ocean-theme .item-type-info { color: #00796b; }
+body.ocean-theme .task-item.completed .task-text { color: #4db6ac; }
+body.ocean-theme .task-item.completed .item-type-info { color: #80cbc4; }
+body.ocean-theme .delete-btn { background-color: #ff8a65; color: white; } /* Coral delete */
+body.ocean-theme .delete-btn:hover { background-color: #ff7043; }
+body.ocean-theme .calendar-controls button { background-color: #b2dfdb; border-color: #80cbc4; color: #004d40; }
+body.ocean-theme .calendar-controls button:hover { background-color: #80cbc4; }
+body.ocean-theme #current-month-year { color: #00695c; }
+body.ocean-theme #calendar-view { background-color: #ffffff; border-color: #b2dfdb; }
+body.ocean-theme .calendar-day-header { color: #00796b; }
+body.ocean-theme .calendar-day { background-color: #ffffff; border-color: #e0f2f1; }
+body.ocean-theme .calendar-day.empty { background-color: #e0f7fa; border-color: #e0f7fa; }
+body.ocean-theme .calendar-day.today { border-color: #4db6ac; }
+body.ocean-theme .calendar-day.today span { background-color: #009688; color: white; }
+body.ocean-theme .calendar-day.has-task { background-color: #b2ebf2; } /* Light cyan task day */
+body.ocean-theme .calendar-task-list p { background-color: rgba(0, 150, 136, 0.1); color: #004d40; }
+body.ocean-theme .calendar-task-list p[style*="line-through"] { background-color: rgba(77, 182, 172, 0.15); color: #4db6ac; }
+body.ocean-theme .theme-selector-wrapper label { color: #00695c; }
+body.ocean-theme #theme-select { background-color: #ffffff; border-color: #4db6ac; color: #004d40; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23009688%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+
+
+/* --- Forest Theme --- */
+body.forest-theme {
+    background-color: #f1f8e9; /* Very light green */
+    color: #33691e; /* Dark green text */
+}
+body.forest-theme .container {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(51, 105, 30, 0.1);
+}
+body.forest-theme h1, body.forest-theme h2 { color: #558b2f; }
+body.forest-theme h2 { border-top-color: #dcedc8; }
+body.forest-theme #task-input,
+body.forest-theme #reminder-time,
+body.forest-theme #item-type-select {
+    border-color: #aed581;
+    background-color: #ffffff;
+    color: #33691e;
+}
+body.forest-theme #task-input:focus,
+body.forest-theme #reminder-time:focus,
+body.forest-theme #item-type-select:focus {
+    border-color: #8bc34a; /* Lime green focus */
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.25);
+}
+body.forest-theme #add-task-btn { background-color: #8bc34a; color: #33691e; } /* Lime green button */
+body.forest-theme #add-task-btn:hover { background-color: #7cb342; }
+body.forest-theme .filter-btn { background-color: #dcedc8; border-color: #c5e1a5; color: #558b2f; }
+body.forest-theme .filter-btn:hover { background-color: #c5e1a5; border-color: #aed581; }
+body.forest-theme .filter-btn.active { background-color: #8bc34a; border-color: #8bc34a; color: #33691e; }
+body.forest-theme .task-item { background-color: #ffffff; border-color: #dcedc8; }
+body.forest-theme .task-item:hover { background-color: #f1f8e9; border-color: #c5e1a5; }
+body.forest-theme .task-checkbox { accent-color: #8bc34a; }
+body.forest-theme .task-text { color: #33691e; }
+body.forest-theme .item-type-info { color: #558b2f; }
+body.forest-theme .task-item.completed .task-text { color: #9ccc65; }
+body.forest-theme .task-item.completed .item-type-info { color: #aed581; }
+body.forest-theme .delete-btn { background-color: #ef5350; color: white; } /* Standard red delete */
+body.forest-theme .delete-btn:hover { background-color: #e53935; }
+body.forest-theme .calendar-controls button { background-color: #dcedc8; border-color: #c5e1a5; color: #558b2f; }
+body.forest-theme .calendar-controls button:hover { background-color: #c5e1a5; }
+body.forest-theme #current-month-year { color: #558b2f; }
+body.forest-theme #calendar-view { background-color: #ffffff; border-color: #dcedc8; }
+body.forest-theme .calendar-day-header { color: #558b2f; }
+body.forest-theme .calendar-day { background-color: #ffffff; border-color: #f1f8e9; }
+body.forest-theme .calendar-day.empty { background-color: #f1f8e9; border-color: #f1f8e9; }
+body.forest-theme .calendar-day.today { border-color: #aed581; }
+body.forest-theme .calendar-day.today span { background-color: #8bc34a; color: #33691e; }
+body.forest-theme .calendar-day.has-task { background-color: #dcedc8; } /* Light green task day */
+body.forest-theme .calendar-task-list p { background-color: rgba(139, 195, 74, 0.1); color: #33691e; }
+body.forest-theme .calendar-task-list p[style*="line-through"] { background-color: rgba(174, 213, 129, 0.15); color: #9ccc65; }
+body.forest-theme .theme-selector-wrapper label { color: #558b2f; }
+body.forest-theme #theme-select { background-color: #ffffff; border-color: #aed581; color: #33691e; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238BC34A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 1px solid #dee2e6; /* Match separator style */
+    color: #6c757d; /* Grey text */
+    font-size: 0.9em;
+    font-family: 'Dancing Script', cursive; /* Example cursive font */
+    font-weight: 700; /* Make it bold */
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Footer Theme Overrides */
+body.dark-mode footer {
+    border-top-color: #4a5568;
+    color: #a0aec0;
+    font-weight: 700; /* Ensure bold applies */
+}
+body.ocean-theme footer {
+    border-top-color: #b2dfdb;
+    color: #00796b;
+    font-weight: 700; /* Ensure bold applies */
+}
+body.forest-theme footer {
+    border-top-color: #dcedc8;
+    color: #558b2f;
+    font-weight: 700; /* Ensure bold applies */
+}
+
+/* Logo Theme Overrides */
+body.dark-mode .app-logo { color: #63b3ed; }
+body.ocean-theme .app-logo { color: #009688; }
+body.forest-theme .app-logo { color: #8bc34a; }
+
+/* Author Name Theme Overrides */
+body.dark-mode .author-name { color: #a0aec0; font-weight: 700; }
+body.ocean-theme .author-name { color: #00796b; font-weight: 700; }
+body.forest-theme .author-name { color: #558b2f; font-weight: 700; }
+
+
+/* --- Daily View Modal --- */
+.modal-overlay {
+    position: fixed; /* Stay in place */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top */
+    opacity: 0; /* Start hidden */
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+
+.modal-content {
+    background-color: #fff; /* Use theme variable later */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 700px; /* Limit max width */
+    max-height: 80vh; /* Limit max height */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #aaa; /* Use theme variable later */
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+.close-btn:hover {
+    color: #333; /* Use theme variable later */
+}
+
+#daily-view-date {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #343a40; /* Use theme variable later */
+}
+
+#daily-timeline {
+    position: relative;
+    border-left: 2px solid #dee2e6; /* Timeline axis */
+    padding-left: 15px;
+}
+
+.timeline-slot {
+    position: relative;
+    height: 50px; /* Height per hour */
+    border-top: 1px dashed #e9ecef; /* Hour separator */
+    display: flex;
+    align-items: flex-start;
+}
+.timeline-slot:first-child {
+    border-top: none;
+}
+
+.timeline-time {
+    position: absolute;
+    left: -55px; /* Position time label to the left */
+    top: -0.6em; /* Align vertically */
+    font-size: 0.8em;
+    color: #6c757d; /* Use theme variable later */
+    width: 45px;
+    text-align: right;
+}
+
+.timeline-task {
+    position: absolute;
+    left: 10px;
+    right: 5px;
+    background-color: rgba(0, 123, 255, 0.7); /* Default task color */
+    color: white;
+    padding: 2px 6px; /* Adjust padding */
+    border-radius: 4px;
+    font-size: 0.8em;
+    overflow: hidden; /* Keep hidden */
+    text-overflow: ellipsis; /* Keep ellipsis */
+    white-space: normal; /* Allow text wrapping */
+    line-height: 1.3; /* Adjust line height */
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: default;
+    min-height: 20px; /* Minimum pixel height */
+    box-sizing: border-box; /* Include padding in height calculation */
+    /* display: flex; Remove flex display */
+    /* align-items: center; Remove flex alignment */
+}
+
+.timeline-task.reminder {
+     background-color: rgba(23, 162, 184, 0.7); /* Default reminder color (info blue) */
+}
+
+/* Daily View Theme Overrides */
+body.dark-mode .modal-content { background-color: #2d3748; }
+body.dark-mode .close-btn { color: #718096; }
+body.dark-mode .close-btn:hover { color: #cbd5e0; }
+body.dark-mode #daily-view-date { color: #cbd5e0; }
+body.dark-mode #daily-timeline { border-left-color: #4a5568; }
+body.dark-mode .timeline-slot { border-top-color: #4a5568; }
+body.dark-mode .timeline-time { color: #a0aec0; }
+body.dark-mode .timeline-task { background-color: rgba(49, 130, 206, 0.8); }
+body.dark-mode .timeline-task.reminder { background-color: rgba(99, 179, 237, 0.7); } /* Lighter blue reminder */
+
+body.ocean-theme .modal-content { background-color: #ffffff; }
+body.ocean-theme .close-btn { color: #80cbc4; }
+body.ocean-theme .close-btn:hover { color: #004d40; }
+body.ocean-theme #daily-view-date { color: #00695c; }
+body.ocean-theme #daily-timeline { border-left-color: #b2dfdb; }
+body.ocean-theme .timeline-slot { border-top-color: #e0f2f1; }
+body.ocean-theme .timeline-time { color: #00796b; }
+body.ocean-theme .timeline-task { background-color: rgba(0, 150, 136, 0.8); }
+body.ocean-theme .timeline-task.reminder { background-color: rgba(77, 182, 172, 0.8); } /* Teal reminder */
+
+body.forest-theme .modal-content { background-color: #ffffff; }
+body.forest-theme .close-btn { color: #aed581; }
+body.forest-theme .close-btn:hover { color: #33691e; }
+body.forest-theme #daily-view-date { color: #558b2f; }
+body.forest-theme #daily-timeline { border-left-color: #dcedc8; }
+body.forest-theme .timeline-slot { border-top-color: #f1f8e9; }
+body.forest-theme .timeline-time { color: #558b2f; }
+body.forest-theme .timeline-task { background-color: rgba(139, 195, 74, 0.8); color: #33691e; }
+body.forest-theme .timeline-task.reminder { background-color: rgba(174, 213, 129, 0.8); color: #33691e; } /* Lighter green reminder */
